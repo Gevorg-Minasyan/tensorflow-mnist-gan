@@ -1,4 +1,3 @@
-import  itertools
 import imageio
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,30 +21,26 @@ def create_results_dir():
 
 
 
-def save_results(gan, num_epoch, path = 'result.png', isFix=False):
+def save_results(gan, random_dim, num_epoch, path = 'result.png', isFix=False, dim=(5, 5), img_size=(28, 28), figsize=(5, 5)):
     if isFix:
         test_images = gan.generate()
     else:
-        z_ = np.random.normal(0, 1, (25, 100))
+        z_ = np.random.normal(0, 1, (dim[0]*dim[1], random_dim))
         test_images = gan.generate(z_)
-
-    size_figure_grid = 5
-    fig, ax = plt.subplots(size_figure_grid, size_figure_grid, figsize=(5, 5))
-    for i, j in itertools.product(range(size_figure_grid), range(size_figure_grid)):
-        ax[i, j].get_xaxis().set_visible(False)
-        ax[i, j].get_yaxis().set_visible(False)
-
-    for k in range(5*5):
-        i = k // 5
-        j = k % 5
-        ax[i, j].cla()
-        ax[i, j].imshow(np.reshape(test_images[k], (28, 28)), cmap='gray_r')
-
+        
+    test_images = test_images.reshape(dim[0]*dim[1], img_size[0], img_size[1])
+        
+    fig = plt.figure(figsize=figsize)
+    for i in range(test_images.shape[0]):
+        plt.subplot(dim[0], dim[1], i+1)
+        plt.imshow(test_images[i], interpolation='nearest', cmap='gray_r')
+        plt.axis('off')
+   
     label = 'Epoch {0}'.format(num_epoch)
     fig.text(0.5, 0.04, label, ha='center')
     plt.savefig(path)
     plt.close()
-
+    
 
 def save_train_history(history, path = 'train_history.png'):
     x = range(len(history['D_losses']))
