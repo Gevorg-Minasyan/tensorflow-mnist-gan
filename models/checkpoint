@@ -1,3 +1,4 @@
-model_checkpoint_path: "gan_model_ckpt-40"
+model_checkpoint_path: "gan_model_ckpt-60"
 all_model_checkpoint_paths: "gan_model_ckpt-20"
 all_model_checkpoint_paths: "gan_model_ckpt-40"
+all_model_checkpoint_paths: "gan_model_ckpt-60"

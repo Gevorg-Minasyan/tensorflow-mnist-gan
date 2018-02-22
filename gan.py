@@ -157,8 +157,8 @@ class GAN():
             np.random.shuffle(idx)
             for iter in tqdm(range(train_set.shape[0] // self.batch_size)):
                 # update discriminator
-                #x_ = train_set[idx[iter*self.batch_size:(iter+1)*self.batch_size]]
-                x_ = train_set[np.random.randint(0, train_set.shape[0], size=self.batch_size)]
+                x_ = train_set[idx[iter*self.batch_size:(iter+1)*self.batch_size]]
+                #x_ = train_set[np.random.randint(0, train_set.shape[0], size=self.batch_size)]
                 z_ = np.random.normal(0, 1, (x_.shape[0], self.random_dim))
                 y_real_ = np.ones(x_.shape[0])*0.9
                 y_fake_ = np.zeros(x_.shape[0])
