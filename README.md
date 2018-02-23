@@ -14,7 +14,7 @@
       --batch_size          number of training batch size [128]
       --keep_prob           dropout parameter for descriminator network [0.3]
       --restoring_epoch     number of epoch for restoring learning parameters [500]
-      --random_dim          dimension random input [100]
+      --random_dim          random input dimension[100]
 
 Generated images and training history are saved in the **results** directory and learning parameters are saved in the **models** directory.
 
