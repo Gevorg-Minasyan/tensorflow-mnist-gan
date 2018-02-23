@@ -7,11 +7,11 @@ from utils import create_results_dir, save_results
 def parse_args(*argument_array):
     parser = argparse.ArgumentParser()
     parser.add_argument('--train', type=str, default='False')
-    parser.add_argument('--epochs', type=int, default=500)
+    parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--lr_rate', type=float, default=0.0002)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--keep_prob', type=float, default=0.3)
-    parser.add_argument('--restoring_epoch', type=int, default=500)
+    parser.add_argument('--restoring_epoch', type=int, default=200)
     parser.add_argument('--random_dim', type=int, default=100)
     args = parser.parse_args(*argument_array)
     return args
@@ -40,4 +40,4 @@ if __name__ == "__main__":
 
     else:
         gan.load(args.restoring_epoch)
-        save_results(gan, args.random_dim, args.restoring_epoch, 'results/gan_genarated_image.png')
+        save_results(gan, args.random_dim, args.restoring_epoch, 'results/gan_genarated_image.png', dim = (7, 7), figsize=(7, 7))

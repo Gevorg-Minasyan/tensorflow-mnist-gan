@@ -54,7 +54,7 @@ def save_train_history(history, path = 'train_history.png'):
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
-    plt.legend(loc=4)
+    plt.legend(loc=1)
     plt.grid(True)
     plt.tight_layout()
 

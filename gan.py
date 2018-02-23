@@ -107,6 +107,7 @@ class GAN():
         #self._D_loss = tf.reduce_mean(-tf.log(D_real+eps) - tf.log(1 - D_fake+eps))
         #self._G_loss = tf.reduce_mean(-tf.log(D_fake+eps))
         
+        # alternative loss function
         D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_real, labels=self._real_y))
         D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=D_fake, labels=self._fake_y))
         self._D_loss = D_loss_real + D_loss_fake
@@ -160,6 +161,8 @@ class GAN():
                 x_ = train_set[idx[iter*self.batch_size:(iter+1)*self.batch_size]]
                 #x_ = train_set[np.random.randint(0, train_set.shape[0], size=self.batch_size)]
                 z_ = np.random.normal(0, 1, (x_.shape[0], self.random_dim))
+                
+                # soft labels
                 y_real_ = np.ones(x_.shape[0])*0.9
                 y_fake_ = np.zeros(x_.shape[0])
                 loss_d_, _ = self.sess.run([self._D_loss, self._D_optim], {self._x: x_, self._z: z_, self._real_y: y_real_, self._fake_y: y_fake_, self._drop_out: self.keep_prob})
