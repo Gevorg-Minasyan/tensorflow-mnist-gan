@@ -10,15 +10,24 @@ from utils import *
 
 class GAN():
 
-    def __init__(self, batch_size = 100, lr_rate = 0.0002, epochs = 100, keep_prob = 0.3, random_dim = 100):
+    def __init__(self, sess, batch_size = 100, lr_rate = 0.0002, epochs = 100, keep_prob = 0.3, random_dim = 100):
 
         # training hyperparameters
         self.batch_size = batch_size
         self.lr_rate = lr_rate
         self.epochs = epochs
         self.keep_prob = keep_prob
-        self.fixed_z_ = np.random.normal(0, 1, (25, random_dim))
         self.random_dim = random_dim
+
+        # generate fixed inputs form gaussian normal
+        self.fixed_z_ = np.random.normal(0, 1, (25, random_dim))
+
+        # tensorflow session object 
+        self.sess = sess
+
+        # construct model
+        self.__construct_model()
+        sess.run(tf.global_variables_initializer())
 
 
     def __generator(self, x):
@@ -80,10 +89,7 @@ class GAN():
         b3 = tf.get_variable('D_b3', [1], initializer=b_init)
         o = tf.matmul(h2, w3) + b3
 
-        return o
-    
-       
-
+        return o    
 
     def __construct_model(self):
         # networks : generator
@@ -126,11 +132,6 @@ class GAN():
 
     def fit(self, train_set):
 
-        self.__construct_model()
-
-        # open session and initialize all variables
-        self.sess = tf.InteractiveSession()
-        tf.global_variables_initializer().run()
         train_var = [self._z, self._G_z, self._drop_out]
         tf.add_to_collection('train_var', train_var[0])
         tf.add_to_collection('train_var', train_var[1])
@@ -145,8 +146,7 @@ class GAN():
         train_hist['G_losses'] = []
         train_hist['per_epoch_ptimes'] = []
         train_hist['total_ptime'] = []
-        
-
+       
         # training-loop
         print('training start!')
         start_time = time.time()
@@ -181,10 +181,10 @@ class GAN():
             epoch_end_time = time.time()
             per_epoch_ptime = epoch_end_time - epoch_start_time
             print('[%d/%d] - ptime: %.2f loss_d: %.3f, loss_g: %.3f' % ((epoch + 1), self.epochs, per_epoch_ptime, np.mean(D_losses), np.mean(G_losses)))
-            p = 'results/random_results/gan_generated_image_epoch_' + str(epoch + 1) + '.png'
-            fixed_p = 'results/fixed_results/gan_generated_image_epoch_' + str(epoch + 1) + '.png'
-            save_results(self, self.random_dim, (epoch + 1), path=p, isFix=False)
-            save_results(self, self.random_dim, (epoch + 1), path=fixed_p, isFix=True)
+            p = 'results/gan_random_results/generated_image_epoch_' + str(epoch + 1) + '.png'
+            fixed_p = 'results/gan_fixed_results/generated_image_epoch_' + str(epoch + 1) + '.png'
+            save_results(self, (epoch + 1), path=p, isFix=False)
+            save_results(self, (epoch + 1), path=fixed_p, isFix=True)
             train_hist['D_losses'].append(np.mean(D_losses))
             train_hist['G_losses'].append(np.mean(G_losses))
             train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
@@ -195,23 +195,19 @@ class GAN():
 
         print('Avg per epoch ptime: %.2f, total %d epochs ptime: %.2f' % (np.mean(train_hist['per_epoch_ptimes']), self.epochs, total_ptime))
         print("Training finish!... save training results")
-        with open('results/train_history.pkl', 'wb') as f:
+        with open('results/gan_train_history.pkl', 'wb') as f:
             pickle.dump(train_hist, f)
-        save_train_history(train_hist,  path='results/train_history.png')
-        save_animation(self.epochs)
+        save_train_history(train_hist,  path='results/gan_train_history.png')
+        save_animation(self.epochs, 'results/gan_animation.gif', 'results/gan_fixed_results/')
 
-    def generate(self, z = None):
-        if z is None:
+    def generate(self, isFix = False, number = 1):
+        if isFix:
             return self.sess.run(self._G_z, {self._z: self.fixed_z_, self._drop_out: 0.0})
+        z = np.random.normal(0, 1, (number, self.random_dim))
         return self.sess.run(self._G_z, {self._z: z, self._drop_out: 0.0})
 
 
     def load(self, epoch):
-        self.sess = tf.InteractiveSession()
-        tf.global_variables_initializer().run()
-        saver = tf.train.import_meta_graph('models/gan_model_ckpt.meta')
+        saver = tf.train.Saver()
         saver.restore(self.sess, 'models/gan_model_ckpt-' + str(epoch))
-        self._z = tf.get_collection('train_var')[0]
-        self._G_z = tf.get_collection('train_var')[1]
-        self._drop_out = tf.get_collection('train_var')[2]
 

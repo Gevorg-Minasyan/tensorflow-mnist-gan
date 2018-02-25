@@ -1,12 +1,15 @@
-from gan import GAN
-import numpy as np
 import argparse
-from utils import create_results_dir, save_results
+from gan import GAN
+from dcgan import DCGAN
+import numpy as np
+import tensorflow as tf
+from utils import create_results_dir, save_results, save_animation
 
 
 def parse_args(*argument_array):
     parser = argparse.ArgumentParser()
     parser.add_argument('--train', type=str, default='False')
+    parser.add_argument('--model', type=int, default=0)
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--lr_rate', type=float, default=0.0002)
     parser.add_argument('--batch_size', type=int, default=128)
@@ -20,24 +23,50 @@ if __name__ == "__main__":
 
     args = parse_args()
 
-    gan = GAN(epochs = args.epochs, 
-              lr_rate = args.lr_rate,
-              batch_size = args.batch_size, 
-              keep_prob = args.keep_prob,
-              random_dim = args.random_dim)
+    with tf.Session() as sess:
 
-    if args.train == 'True':
-        create_results_dir()
+        if args.model == 0:
+            model = GAN(sess = sess,
+                        epochs = args.epochs, 
+                        lr_rate = args.lr_rate,
+                        batch_size = args.batch_size, 
+                        keep_prob = args.keep_prob,
+                        random_dim = args.random_dim)
+        elif args.model == 1:
+            model = DCGAN(sess = sess,
+                          epochs = args.epochs, 
+                          lr_rate = args.lr_rate,
+                          batch_size = args.batch_size, 
+                          keep_prob = args.keep_prob,
+                          random_dim = args.random_dim)
+        else:
+            raise ValueError('The mode argument only takes values 0 or 1.')           
 
-        # load MNIST
-        X_train = np.load('MNIST_data/mnist_train_x.npy')
-        X_train = (X_train.astype(np.float32) - 127.5)/127.5
-        X_train = X_train.reshape(60000, 784)
+        if args.train == 'True':
+            create_results_dir()
 
+            # load MNIST
+            X_train = np.load('MNIST_data/mnist_train_x.npy')
+            
+            if args.model == 0:  
+                X_train = X_train.reshape(60000, 784)
+            elif args.model == 1:
+                X_train = X_train.reshape(60000, 28, 28, 1)
+                X_train = tf.image.resize_images(X_train, [64, 64]).eval()
 
-        # train
-        gan.fit(X_train)
+            # normalize -1 to 1
+            X_train = (X_train.astype(np.float32) - 127.5)/127.5
 
-    else:
-        gan.load(args.restoring_epoch)
-        save_results(gan, args.random_dim, args.restoring_epoch, 'results/gan_genarated_image.png', dim = (7, 7), figsize=(7, 7))
+            #train
+            model.fit(X_train)
+
+        else:
+            save_animation(15, 'results/dcgan_animation.gif', 'results/dcgan_fixed_results/')
+            model.load(args.restoring_epoch)
+            if args.model == 0:
+                img_path = 'results/gan_genarated_image.png'
+                img_size = (28, 28)
+            elif args.model == 1:
+                img_path = 'results/dcgan_genarated_image.png'
+                img_size = (64, 64)
+            save_results(model, args.restoring_epoch, img_path, dim = (7, 7), figsize=(7, 7), img_size =img_size)

@@ -1,6 +1,15 @@
 # GAN model on MNIST dataset 
 
-<p><img src = 'results/animation.gif'></p>
+<table align='center'>
+<tr align='center'>
+<td> GAN</td>
+<td> DCGAN</td>
+</tr>
+<tr>
+<td><img src = 'results/gan_animation.gif'>
+<td><img src = 'results/dcgan_animation.gif'>
+</tr>
+</table>
 
 
 # Documentation of Parameters
@@ -9,6 +18,7 @@
     
     The following arguments are configuration hyperparameters for train: 
       --train               training indicator if it is False then images will be generated from random inputs [False]
+      --model				        model indicator takes values 0 simple gan model and 1 dcgan model [0]
       --epochs              number of training epochs [200]
       --lr_rate             training learing rate for Adam optimizer [0.0002]
       --batch_size          number of training batch size [128]
