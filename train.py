@@ -61,7 +61,6 @@ if __name__ == "__main__":
             model.fit(X_train)
 
         else:
-            save_animation(15, 'results/dcgan_animation.gif', 'results/dcgan_fixed_results/')
             model.load(args.restoring_epoch)
             if args.model == 0:
                 img_path = 'results/gan_genarated_image.png'
